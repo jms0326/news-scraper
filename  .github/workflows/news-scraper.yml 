@@ -18,6 +18,7 @@ jobs:
     name: 뉴스 이슈 생성
     runs-on: ubuntu-latest
 #    timeout-minutes: 10 # 너무 오래 기다릴 시 취소
+
     steps:
       - name: 저장소 체크아웃
         uses: actions/checkout@v7
