@@ -59,3 +59,4 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           NEWS_QUERY: ${{ vars.NEWS_QUERY }}
           NEWS_DISPLAY: ${{ vars.NEWS_DISPLAY }}
+          NEWS_CATEGORY: ${{ vars.NEWS_CATEGORY }}
