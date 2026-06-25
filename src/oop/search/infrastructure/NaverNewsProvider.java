@@ -12,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NaverNewsProvider extends AbstractHttpScraper {
+//public class NaverNewsProvider extends AbstractHttpScraper {
+public class NaverNewsProvider extends AbstractHttpClient implements NewsProvider {
     //    protected AbstractHttpScraper(String endpoint) {
 //        this.endpoint = endpoint;
 //    }
