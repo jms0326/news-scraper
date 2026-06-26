@@ -1,6 +1,7 @@
 package oop.search.domain;
 
 // https://developers.naver.com/docs/serviceapi/search/news/news.md#%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0
+// 다른 네이버 OpenAPI와 공용이라면 SortOption
 public enum NewsCategory {
     //    SIM, DATE;
     SIM("sim", "정확도순"), DATE("date", "최신순");

@@ -28,6 +28,19 @@ public class GitHubNewsPublisher extends AbstractHttpClient implements NewsPubli
     public void publish(String topic, List<NewsResult> newsResults) {
 //        httpClient
         String url = endpoint;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<strong>%s</strong>(와)과 관련된 최신 뉴스입니다<br><br>".formatted(topic));
+        for (NewsResult newsResult : newsResults) {
+            sb.append("[%s]".formatted(newsResult.title()));
+            sb.append("(%s) <br> `%s` <br>".formatted(
+                    newsResult.url(),
+                    newsResult.pubDate()));
+            sb.append("<blockquote>%s</blockquote>".formatted(newsResult.description()));
+        }
+        String body = sb.toString();
+        System.out.println("body = " + body);
+
         String payload = """
                 {
                 "title": "%s",
@@ -36,8 +49,12 @@ public class GitHubNewsPublisher extends AbstractHttpClient implements NewsPubli
                 """.formatted(
                 // %s -> topic. %s -> 한국기준 현재 시간
                 "%s (%s)".formatted(topic, ZonedDateTime.now(ZoneId.of("Asia/Seoul"))),
-                newsResults
+//                newsResults
+                body
         ).trim();
+
+        System.out.println("payload = " + payload);
+
         HttpRequest request = HttpRequest.newBuilder()
 //                .GET()
                 .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8))
