@@ -11,6 +11,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //public class NaverNewsProvider extends AbstractHttpScraper {
 public class NaverNewsProvider extends AbstractHttpClient implements NewsProvider {
@@ -28,8 +30,17 @@ public class NaverNewsProvider extends AbstractHttpClient implements NewsProvide
         super(NEWS_API_URL);
         this.clientId = System.getenv("NAVER_CLIENT_ID");
         this.clientSecret = System.getenv("NAVER_CLIENT_SECRET");
-        this.category = NewsCategory.valueOf(System.getenv("NEWS_CATEGORY"));
-        // SIM, DATE -> 변환 (Enum - NewsCategory.SIM, NewsCategory.DATE)
+        String categoryName = System.getenv("NEWS_CATEGORY");
+        if (clientId == null || clientId.isBlank()) {
+            throw new IllegalStateException("NAVER_CLIENT_ID 환경변수가 필요합니다.");
+        }
+        if (clientSecret == null || clientSecret.isBlank()) {
+            throw new IllegalStateException("NAVER_CLIENT_SECRET 환경변수가 필요합니다.");
+        }
+        if (categoryName == null || categoryName.isBlank()) {
+            throw new IllegalStateException("NEWS_CATEGORY 환경변수가 필요합니다. 예: SIM 또는 DATE");
+        }
+        this.category = NewsCategory.valueOf(categoryName);
         System.out.println("clientId = " + clientId.substring(0, 3) + "...");
         System.out.println("clientSecret = " + clientSecret.substring(0, 3) + "...");
         System.out.println("category = " + category);
@@ -73,7 +84,10 @@ public class NaverNewsProvider extends AbstractHttpClient implements NewsProvide
                 String description = cutText(item, "\"description\":\"", "\",\n");
                 // pubDate는 문자열 ""가 추가적으로 들어갈 염려가 없기 때문에 바로 "로 구분
                 String pubDate = cutText(item, "\"pubDate\":\"", "\"");
-                NewsResult result = new NewsResult(title, description, link, pubDate);
+
+                link = link.replace("\\/", "/");
+                String imageUrl = fetchImageUrl(link);
+                NewsResult result = new NewsResult(title, description, link, pubDate, imageUrl);
                 results.add(result);
             }
 
@@ -89,6 +103,43 @@ public class NaverNewsProvider extends AbstractHttpClient implements NewsProvide
         return original
                 .split(prefix)[1]
                 .split(suffix)[0];
+    }
+
+    private String fetchImageUrl(String articleUrl) {
+        try {
+            HttpRequest imageRequest = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(URI.create(articleUrl))
+                    .header("User-Agent", "Mozilla/5.0")
+                    .build();
+
+            HttpResponse<String> imageResponse = httpClient.send(
+                    imageRequest,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+            String html = imageResponse.body();
+
+            Pattern pattern = Pattern.compile(
+                    "<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+            );
+            Matcher matcher = pattern.matcher(html);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+
+            Pattern fallbackPattern = Pattern.compile(
+                    "<meta[^>]*name=[\"']twitter:image[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+            );
+            Matcher fallbackMatcher = fallbackPattern.matcher(html);
+            if (fallbackMatcher.find()) {
+                return fallbackMatcher.group(1);
+            }
+        } catch (Exception e) {
+            System.out.println("이미지 URL을 가져오지 못했습니다: " + articleUrl);
+        }
+        return "";
     }
 
     public static void main(String[] args) {

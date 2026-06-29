@@ -37,6 +37,12 @@ public class GitHubNewsPublisher extends AbstractHttpClient implements NewsPubli
                     newsResult.url(),
                     newsResult.pubDate()));
             sb.append("<blockquote>%s</blockquote>".formatted(newsResult.description()));
+            if (newsResult.imageUrl() != null && !newsResult.imageUrl().isBlank()) {
+                sb.append("<img src=\"%s\" alt=\"%s\" width=\"320\"><br><br>".formatted(
+                        newsResult.imageUrl(),
+                        newsResult.title()
+                ));
+            }
         }
         String body = sb.toString();
         System.out.println("body = " + body);
