@@ -11,11 +11,12 @@ public record NewsResult(
         String title,
         String description,
         String url,
-        String pubDate
+        String pubDate,
+        String imageUrl
         // original url은 생략
 ) {
     public static void main(String[] args) {
-        NewsResult result = new NewsResult("환율 1600원 되나?", "현재 1550원 간당간당하고 혹시 달러로 구독중이면 조심하세요", "https://naver.com", "2026.12.32");
+        NewsResult result = new NewsResult("환율 1600원 되나?", "현재 1550원 간당간당하고 혹시 달러로 구독중이면 조심하세요", "https://naver.com", "2026.12.32", "이미지 경로");
         System.out.println("result = " + result);
         System.out.println("result.title = " + result.title);
 //        result.title = "2000원 되나?"; // 막혀있다
